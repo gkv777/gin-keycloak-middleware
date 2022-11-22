@@ -1,6 +1,7 @@
 package ginkeycloakmiddleware
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strings"
@@ -17,10 +18,15 @@ type AuthKeycloakMiddleware struct {
 	keycloak *keycloak
 }
 
-func NewAuthKeycloakMiddleware(k *keycloak) AuthKeycloakMiddleware {
-	return AuthKeycloakMiddleware{
-		keycloak: k,
+func NewAuthKeycloakMiddleware(url, client, secret, realm string) (*AuthKeycloakMiddleware, error) {
+	k, err := NewKeycloakClient(context.Background(), url, client, secret, realm)
+	if err != nil {
+		return nil, err
 	}
+
+	return &AuthKeycloakMiddleware{
+		keycloak: k,
+	}, nil
 }
 
 func (m *AuthKeycloakMiddleware) abort(c *gin.Context, status int, msg string) {
